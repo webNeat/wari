@@ -1,7 +1,7 @@
-import { WariError } from "./WariError.js"
-import { ErrorDetails, ErrorHandlers, ErrorKey, GetErrorKeys, MatchReturn, Normalize } from "./types.js"
+import { WariError } from './WariError.js'
+import type { ErrorDetails, ErrorHandlers, ErrorKey, GetErrorKeys, MatchReturn, Normalize } from './types.js'
 
-export {ErrorTypes} from './types.js'
+export type { ErrorTypes } from './types.js'
 
 export function make<K extends ErrorKey>(type: K, details: ErrorDetails<K>) {
   return new WariError(type, details)

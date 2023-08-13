@@ -1,11 +1,11 @@
 {
-  "include": ["src", "types"],
+  "exclude": ["dist", "node_modules"],
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "lib": ["esnext", "DOM"],
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "lib": ["esnext"],
+    "rootDir": ".",
+    "noEmit": true,
     "sourceMap": true,
     "importHelpers": true,
     "declaration": true,
