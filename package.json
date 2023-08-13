@@ -1,0 +1,31 @@
+{
+  "name": "wari",
+  "author": "Amine Ben hammou",
+  "description": "A type-safe way to throw and catch errors.",
+  "license": "MIT",
+  "version": "1.0.0-alpha.1",
+  "repository": "webNeat/wari",
+  "homepage": "https://github.com/webNeat/wari",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "test": "node --loader tsx --test tests/make.test.ts",
+    "build": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.10",
+    "expect-type": "^0.16.0",
+    "prettier": "^2.8.8",
+    "tsx": "^3.12.7"
+  }
+}
