@@ -12,7 +12,7 @@ export function is<E, K extends GetErrorKeys<E>>(error: E, type: K): error is E 
 }
 
 export function match<E, H extends ErrorHandlers<E>>(error: E, handlers: H): Normalize<MatchReturn<E, H>> {
-  const fn = handlers[(error as any)?.type as GetErrorKeys<E>]
+  const fn = handlers[(error as any)?.type as GetErrorKeys<E>] as any
   if (error instanceof WariError && fn !== undefined) {
     return fn(error as any)
   }

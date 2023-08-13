@@ -9,7 +9,7 @@ export type ErrorHandlers<E> = E extends WariError<infer K>
       [key in K]: (x: WariError<key>) => any
     }
   : never
-// @ts-expect-error
+
 export type MatchReturn<E, H extends ErrorHandlers<E>> = Exclude<E, WariError<keyof H & keyof ErrorTypes>> | VoidToUndefined<ReturnType<H[keyof H]>>
 export type Normalize<T> = { [key in keyof T]: T[key] } & {}
 

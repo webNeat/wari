@@ -2,6 +2,7 @@
 
 A type-safe way to create and handle errors.
 
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/wari?style=flat-square)](https://bundlephobia.com/result?p=wari)
 [![Version](https://img.shields.io/npm/v/wari?style=flat-square)](https://www.npmjs.com/package/wari)
 [![Tests Status](https://img.shields.io/github/actions/workflow/status/webneat/wari/tests.yml?branch=main&style=flat-square)](https://github.com/webneat/wari/actions?query=workflow:"Tests")
 [![MIT](https://img.shields.io/npm/l/wari?style=flat-square)](LICENSE)
@@ -360,6 +361,10 @@ You can contribute to this library in many ways, including:
 Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
+
+**1.0.0 (August 14 2023)**
+
+- First version.
 
 **1.0.0-alpha.1 (August 13 2023)**
 
