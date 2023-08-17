@@ -346,6 +346,16 @@ async function main() {
 }
 ```
 
+Note that `match` allows you to only match against possible errors based on the function return. For example, since `writeData` can only return the `FileError` error, Typescript will not let you add another error type to `match`.
+
+```ts
+// ...
+wari.match(await writeData('result.json', transformedData), {
+  'FileError': console.error,
+  'JsonError': console.error, // Typescript will complain about this line
+})
+```
+
 # API reference
 
 ...
