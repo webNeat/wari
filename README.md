@@ -15,8 +15,7 @@ A type-safe way to create and handle errors.
   - [ 2. Define your error types](#2-define-your-error-types)
   - [ 3. Create errors](#3-create-errors)
   - [ 4. Handle errors](#4-handle-errors)
-- [Using `wari` without `throw`](#using-wari-without-throw)
-- [API reference](#api-reference)
+  - [5. Catch errors thrown by external code](#5-catch-errors-thrown-by-external-code)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 
@@ -168,13 +167,11 @@ async function main() {
 This is better and more flexible, but it has some issues:
 - The code is verbose.
 - We need to create a new class for every new error type.
-- We need to remember the error class names and import them to do `err instanceof ErrorClass`.
+- We need to remember the possible errors thrown by every function and import them to do `err instanceof ErrorClass`. This can easily cause us to miss some error cases.
 
 The goal of `wari` is to solve these issues while keeping type-safety and being easy to use.
 
-**Note:** if you are thinking "The actual issue is the use of `try/catch`! if you use an `Either` monad or similar then all these issues will desapair!", then you are correct. I personally prefer the functional programming way of handling errors, and I don't like `try/catch`. But the majority of codebases are using `throw` and `try/catch`, so having this library can make handling errors on those projects easier. Also `wari` doesn't require the usage of `try/catch`, you can use it to return errors and check their types in the calling functions.
-
-# Basic usage steps
+# Get started with `wari`
 
 ## 1. Installation
 
@@ -230,135 +227,153 @@ class FileError extends Error {
 
 ## 3. Create errors
 
-Use the `make` function to create new errors
+Use the `new` function to create new errors. Typescript will offer you autocomplete for the first argument of the `new` function, so you don't have to remember all errors names. Once you choose a name, the second argument will be typed with the corresponding details type.
+
+**Return errors instead of throwing them.**
 
 ```ts
+import * as E from 'wari'
+
 async function fetchData() {
   const res = await fetch('...')
-  if (!res.ok) throw wari.make('HttpError', {method: 'GET', url: '...', status: res.status})
+  if (!res.ok) return E.new('HttpError', {method: 'GET', url: '...', status: res.status})
   const text = await res.text()
   try {
-    return JSON.parse(text)
+    return JSON.parse(text) as Data
   } catch (err) {
-    throw wari.make('JsonError', {text})
+    return E.new('JsonError', {text})
   }
 }
 ```
 
-Typescript will offer you autocomplete for the first argument of the `make` function, so you don't have to remember all errors names. Once you choose a name, the second argument will be typed with the corresponding details type.
+**Note:** The `new` function has an alias called `make`, if you don't want to import all functions by using
+```ts
+import * as E from 'wari'
+
+// Use `E.new`
+```
+You can import `make` instead:
+```ts
+import {make} from 'wari'
+
+// Use `make` instead
+```
 
 ## 4. Handle errors
 
-Use the `is` and `match` functions to handle errors.
+Use `any`, `is` and `match` functions to handle errors.
 
-The `is` function checks if a value corresponds to an error type:
-
-```ts
-try {
-  ...
-} catch (err) {
-  if (wari.is(err, 'HttpError')) {
-    // handle Http error
-    // err.details type will be {method: 'GET' | 'POST', url: string, status: number}
-  }
-}
-```
-
-if you want to check for multiple error types, instead of doing:
+Use `any` to check if a value is any error.
 
 ```ts
-try {
-  ...
-} catch (err) {
-  if (wari.is(err, 'HttpError')) {
-    // ...
-  } else if (wari.is(err, 'JsonError')) {
-    // ...
-  } else if (wari.is(err, 'FileError')) {
-    // ...
-  } else {
-    // ...
-  }
-}
-```
-
-You can use the `match` function and do:
-
-```ts
-try {
-  ...
-} catch (err) {
-  wari.match(err, {
-    'HttpError': err => {
-      // ...
-    },
-    'JsonError': err => {
-      // ...
-    },
-    'FileError': err => {
-      // ...
-    },
-    '_': err => {
-      // handle other errors here!
-    }
-  })
-}
-```
-
-# Using `wari` without `throw`
-
-As I mentioned in the introduction, `try/catch` is not a good pattern and should be avoided when possible. `wari` encourages you to handle errors without using `throw`. Here is the example of the introduction rewritten:
-
-```ts
-import {writeFile} from 'fs/promises'
-
-async function fetchData() {
-  const res = await fetch('...')
-  if (!res.ok) return wari.make('HttpError', {method: 'GET', url: '...', status: res.status})
-  const text = await res.text()
-  try {
-    return JSON.parse(text)
-  } catch (err) {
-    return wari.make('JsonError', {text})
-  }
-}
-
-async function writeData(filePath, data) {
-  try {
-    await writeFile(filePath, JSON.stringify(data))
-  } catch (err) {
-    return wari.make('FileError', {operation: 'write', filePath, error: err})
-  }
-}
+import * as E from 'wari'
 
 async function main() {
-  const data = wari.match(await fetchData(), {
-    'HttpError': console.error,
-    'JsonError': console.error
-  })
-  // if the result was an HttpError or JsonError, then `data` will be `undefined` (the result of console.error)
-  if (!data) return;
-  // otherwise `data` will be the returned data with the correct type 
-  // ... transform data
-  wari.match(await writeData('result.json', transformedData), {
-    'FileError': console.error
-  })
+  const data = await fetchData()
+      // ^? Wari<'HttpError'> | Wari<'JsonError'> | Data
+  if (E.any(data)) {
+    // handle the error
+    data
+    // ^? Wari<'HttpError'> | Wari<'JsonError'>
+  } else {
+    // Use the data
+    data
+    // ^? Data
+  }
 }
 ```
 
-Note that `match` allows you to only match against possible errors based on the function return. For example, since `writeData` can only return the `FileError` error, Typescript will not let you add another error type to `match`.
+The `is` function checks if a value corresponds to a specific error type. Typescript infers the possible types based on the first argument, and acceptes only those types in the second argument.
 
 ```ts
-// ...
-wari.match(await writeData('result.json', transformedData), {
-  'FileError': console.error,
-  'JsonError': console.error, // Typescript will complain about this line
-})
+import * as E from 'wari'
+
+async function main() {
+  const data = await fetchData()
+      // ^? Wari<'HttpError'> | Wari<'JsonError'> | Data
+  if (E.is(data, 'HttpError')) {
+    data.details
+        // ^? {method: 'GET' | 'POST', url: string, status: number}
+    return;
+  }
+  
+  if (E.is(data, 'JsonError')) {
+    data.details
+        // ^? {text: string}
+    return;
+  }
+
+  data
+  // ^? Data
+}
 ```
 
-# API reference
+Use the `match` function to match a value against all possible error types. Typescript infers possible error types and gives you autocomplete. You can all or some errors separately and provide a default handler for the remaining errors.
 
-...
+if the value given to `match` is not an error, it's simply returned as is. Otherwise, the corresponding handler is called and is returned value is returned.
+
+```ts
+import * as E from 'wari'
+
+async function main() {
+  const data = E.match(await fetchData(), {
+    HttpError: err => {
+            // ^? Err<'HttpError'>
+      return defaultData as Data
+    },
+    JsonError: err => {
+            // ^? Err<'JsonError'>
+      console.error(err)
+    }
+  })
+  data
+  // ^? Data | undefined
+}
+```
+
+## 5. Catch errors thrown by external code
+
+Even if you don't use `throw` in your code, external code may still throw errors when you call it. In that case, you can use `catch` to catch any thrown error and convert it into a wari error:
+
+```ts
+import * as E from 'wari'
+
+function mayThrow(x: number) {
+  if (x === 42) throw new Error(`Ooops`)
+  return x
+}
+
+const res = E.catch(mayThrow, 1) //=> 1
+const res = E.catch(mayThrow, 42) //=> Err<'Unknown'> with details: {error: new Error('Oooops') }
+```
+
+if you are calling a function that may throw multiple times across your code, you can create a safe function (a function that returns instead of throwing) from it.
+
+```ts
+import * as E from 'wari'
+
+function safeJsonParse<T>(text: string) {
+  const res = E.catch(JSON.parse, text)
+  if (E.any(res)) return E.new('JsonError', {text})
+  return res as T
+}
+```
+
+**Note:** The `catch` function has an alias called `tryCatch`, if you don't want to import all functions by using
+
+```ts
+import * as E from 'wari'
+
+// Use `E.catch`
+```
+
+You can import `tryCatch` instead:
+
+```ts
+import {tryCatch} from 'wari'
+
+// Use `tryCatch` instead
+```
 
 # Contributing
 
