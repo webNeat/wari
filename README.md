@@ -387,6 +387,13 @@ Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
 
+**1.1.0 (August 27 2023)**
+
+- Refactor types.
+- Add `new` alias for `make`.
+- Add `any` to check for any wari error.
+- Add `catch` (and `tryCatch` alias) to catch errors and wrap them into `Err<'Unknown'>`.
+
 **1.0.0 (August 14 2023)**
 
 - First version.
