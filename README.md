@@ -387,6 +387,10 @@ Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
 
+**1.2.0 (August 27 2023)**
+
+- Improve `match` type inference, now the default handler `_` parameter type is only the remaining error types.
+
 **1.1.0 (August 27 2023)**
 
 - Refactor types.

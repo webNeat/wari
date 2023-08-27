@@ -1,6 +1,7 @@
-import { Equal } from 'just-types/test'
+import { Equal, Extends, Is } from 'just-types/test'
+import { SubSequence } from 'just-types/tuple'
 import type { Err } from '../Err.js'
-import { VoidToUndefined } from './utils.js'
+import { Prettify, ToTuple, VoidToUndefined } from './utils.js'
 
 export interface ErrorTypes {
   Unknown: { error: unknown }
@@ -12,10 +13,12 @@ export type GetErrorKeys<E> = E extends Err<infer K> ? K : never
 
 export type GuardReturn<T> = Equal<T, never> extends true ? Err<'Unknown'> : T extends Promise<infer R> ? Promise<R | Err<'Unknown'>> : T | Err<'Unknown'>
 
-export type MatchHandlers<E, H = GetMatchHandlers<E>> = H | (Partial<H> & GetDefaultHandler<E>)
-
+export type MatchHandlers<E, Keys = ToTuple<GetErrorKeys<E>>> = Prettify<
+  // @ts-expect-error
+  {
+    // @ts-expect-error
+    [R in SubSequence<Keys> as `${R}`]: { [key in R[number]]: Handler<key> } & (Keys extends R ? {} : { _: Handler<Exclude<Keys[number], R[number]>> })
+  }[string]
+>
 export type Handler<K extends ErrorKey> = (x: Err<K>) => any
-type GetMatchHandlers<E> = { [key in GetErrorKeys<E>]: Handler<key> }
-type GetDefaultHandler<E> = Err<any> extends E ? Record<'_', (x: Extract<E, Err<any>>) => any> : undefined
-
 export type MatchReturn<E, H extends Record<string, (x: any) => any>> = Exclude<E, Err<any>> | VoidToUndefined<ReturnType<H[keyof H]>>

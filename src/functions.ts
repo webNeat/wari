@@ -15,6 +15,7 @@ export function any<E, K = GetErrorKeys<E>>(error: E): error is K extends never 
   return error instanceof Err
 }
 
+// @ts-expect-error
 export function match<E, H extends MatchHandlers<E>>(error: E, handlers: H): MatchReturn<E, H> {
   if (!(error instanceof Err)) return error as any
   // @ts-expect-error
