@@ -13,12 +13,10 @@ export type GetErrorKeys<E> = E extends Err<infer K> ? K : never
 
 export type GuardReturn<T> = Equal<T, never> extends true ? Err<'Unknown'> : T extends Promise<infer R> ? Promise<R | Err<'Unknown'>> : T | Err<'Unknown'>
 
-export type MatchHandlers<E, Keys = ToTuple<GetErrorKeys<E>>> = Prettify<
-  // @ts-expect-error
-  {
-    // @ts-expect-error
-    [R in SubSequence<Keys> as `${R}`]: { [key in R[number]]: Handler<key> } & (Keys extends R ? {} : { _: Handler<Exclude<Keys[number], R[number]>> })
-  }[string]
->
+export type MatchHandlers<E> = {
+  [key in GetErrorKeys<E>]: Handler<key>
+}
+export type MatchDefaultHandler<E, H> = Handler<Exclude<GetErrorKeys<E>, keyof H>>
+
 export type Handler<K extends ErrorKey> = (x: Err<K>) => any
 export type MatchReturn<E, H extends Record<string, (x: any) => any>> = Exclude<E, Err<any>> | VoidToUndefined<ReturnType<H[keyof H]>>

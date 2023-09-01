@@ -5,7 +5,7 @@ import { Err } from '../src/Err.js'
 test.group('match', () => {
   test('it returns the non-error value', ({ expect }) => {
     const fn = (): number | Err<'JsonError'> | Err<'HttpError'> => 1
-    const res = match(fn(), {
+    let res = match(fn(), {
       HttpError: console.error,
       JsonError: console.error,
     })

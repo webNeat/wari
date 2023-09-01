@@ -45,26 +45,9 @@ type GuardReturn_Tests = [
 
 type MatchHandlers_Tests = [
   Is<Equal<MatchHandlers<number>, {}>>,
-  Is<Equal<MatchHandlers<Err<'X'> | number>, { X: Handler<'X'> } | { _: Handler<'X'> }>>,
-  Is<
-    Equal<
-      MatchHandlers<Err<'X'> | Err<'Y'> | number>,
-      { X: Handler<'X'>; Y: Handler<'Y'> } | { X: Handler<'X'>; _: Handler<'Y'> } | { _: Handler<'X'>; Y: Handler<'Y'> } | { _: Handler<'X' | 'Y'> }
-    >
-  >,
-  Is<
-    Equal<
-      MatchHandlers<Err<'X'> | Err<'Y'> | Err<'Z'> | number>,
-      | { X: Handler<'X'>; Y: Handler<'Y'>; Z: Handler<'Z'> }
-      | { _: Handler<'X'>; Y: Handler<'Y'>; Z: Handler<'Z'> }
-      | { X: Handler<'X'>; _: Handler<'Y'>; Z: Handler<'Z'> }
-      | { X: Handler<'X'>; Y: Handler<'Y'>; _: Handler<'Z'> }
-      | { X: Handler<'X'>; _: Handler<'Y' | 'Z'> }
-      | { Y: Handler<'Y'>; _: Handler<'X' | 'Z'> }
-      | { _: Handler<'X' | 'Y'>; Z: Handler<'Z'> }
-      | { _: Handler<'X' | 'Y' | 'Z'> }
-    >
-  >,
+  Is<Equal<MatchHandlers<Err<'X'> | number>, { X: Handler<'X'> }>>,
+  Is<Equal<MatchHandlers<Err<'X'> | Err<'Y'> | number>, { X: Handler<'X'>; Y: Handler<'Y'> }>>,
+  Is<Equal<MatchHandlers<Err<'X'> | Err<'Y'> | Err<'Z'> | number>, { X: Handler<'X'>; Y: Handler<'Y'>; Z: Handler<'Z'> }>>,
 ]
 
 type MatchReturn_Tests = [
