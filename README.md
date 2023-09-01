@@ -387,6 +387,10 @@ Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
 
+**1.3.0 (September 1st 2023)**
+
+-  Change the `match` function to take the default handler as a third argment (instead of `_`) for better typing.
+
 **1.2.0 (August 27 2023)**
 
 - Improve `match` type inference, now the default handler `_` parameter type is only the remaining error types.
