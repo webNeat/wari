@@ -13,7 +13,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,

@@ -5,13 +5,11 @@ export function make<K extends ErrorKey>(type: K, details: ErrorDetails<K>) {
   return new Err(type, details)
 }
 
-// @ts-expect-error
-export function is<E, K extends GetErrorKeys<E>>(error: E, type: K): error is Err<K> {
+export function is<E, K extends GetErrorKeys<E>>(error: E, type: K): error is Extract<E, Err<K>> {
   return error instanceof Err && error.type === type
 }
 
-// @ts-expect-error
-export function any<E, K = GetErrorKeys<E>>(error: E): error is K extends never ? E : Err<K> {
+export function any<E>(error: E): error is Extract<E, Err<ErrorKey>> {
   return error instanceof Err
 }
 
@@ -30,14 +28,31 @@ export function match(error: unknown, ...args: any[]) {
   return fn(error as any)
 }
 
-export function tryCatch<Args extends any[], T>(fn: (...args: Args) => T, ...args: Args): GuardReturn<T> {
+export function tryCatch<T, R>(fn: () => T, handleError: (err: unknown) => R): GuardReturn<T, R> {
   try {
-    const res = fn(...args)
+    const res = fn()
     if (res instanceof Promise) {
-      return res.catch((error) => new Err('Unknown', { error })) as any
+      return res.catch(handleError) as any
     }
     return res as any
   } catch (error) {
-    return new Err('Unknown', { error }) as any
+    return handleError(error) as any
+  }
+}
+
+export function safe<Args extends any[], T, R>(
+  fn: (...args: Args) => T,
+  handleError: (err: unknown, args: Args) => R,
+): (...args: Args) => GuardReturn<T, R> {
+  return (...args: Args) => {
+    try {
+      const res = fn(...args)
+      if (res instanceof Promise) {
+        return res.catch((err) => handleError(err, args)) as any
+      }
+      return res as any
+    } catch (error) {
+      return handleError(error, args) as any
+    }
   }
 }

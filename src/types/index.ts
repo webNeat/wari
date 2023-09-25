@@ -1,7 +1,6 @@
-import { Equal, Extends, Is } from 'just-types/test'
-import { SubSequence } from 'just-types/tuple'
+import { Equal } from 'just-types/test'
 import type { Err } from '../Err.js'
-import { Prettify, ToTuple, VoidToUndefined } from './utils.js'
+import { VoidToUndefined } from './utils.js'
 
 export interface ErrorTypes {
   Unknown: { error: unknown }
@@ -11,7 +10,7 @@ export type ErrorDetails<K extends ErrorKey = ErrorKey> = ErrorTypes[K]
 
 export type GetErrorKeys<E> = E extends Err<infer K> ? K : never
 
-export type GuardReturn<T> = Equal<T, never> extends true ? Err<'Unknown'> : T extends Promise<infer R> ? Promise<R | Err<'Unknown'>> : T | Err<'Unknown'>
+export type GuardReturn<T, U> = Equal<T, never> extends true ? U : T extends Promise<infer R> ? Promise<R | U> : T | U
 
 export type MatchHandlers<E> = {
   [key in GetErrorKeys<E>]: Handler<key>

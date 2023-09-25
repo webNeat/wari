@@ -1,37 +1,38 @@
 import { test } from '@japa/runner'
 import { Err } from '../src/Err.js'
-import { tryCatch } from '../src/index.js'
+import { make, tryCatch } from '../src/index.js'
 
 test.group('tryCatch', () => {
   test('it handles non-error results', async ({ expect }) => {
     const getFoo = () => 'foo'
     const add = (x: number, y: number) => x + y
     const asyncAdd = async (x: number, y: number) => x + y
-    expect(tryCatch(getFoo)).toBe('foo')
-    expect(tryCatch(add, 1, 1)).toBe(2)
-    expect(await tryCatch(asyncAdd, 1, 2)).toBe(3)
+    const handler = (err: unknown) => make('X', {})
+    expect(tryCatch(getFoo, handler)).toBe('foo')
+    expect(tryCatch(() => add(1, 1), handler)).toBe(2)
+    expect(await tryCatch(() => asyncAdd(1, 2), handler)).toBe(3)
   })
 
   test('it handles sync errors', async ({ expect }) => {
     const error = new Error('Something went wrong')
+    const handler = (err: unknown) => make('X', {})
     const res = tryCatch(() => {
       throw error
-    })
+    }, handler)
     expect(res).toBeInstanceOf(Err)
-    expect(res.type).toBe('Unknown')
-    expect(res.details.error).toBe(error)
+    expect(res.type).toBe('X')
   })
 
   test('it handles async errors', async ({ expect }) => {
     const error = new Error('Something went wrong async')
-    const res = await tryCatch(() => Promise.reject(error))
+    const handler = (err: unknown) => make('X', {})
+    const res = await tryCatch(() => Promise.reject(error), handler)
     expect(res).toBeInstanceOf(Err)
-    expect(res.type).toBe('Unknown')
-    expect(res.details.error).toBe(error)
+    expect(res.type).toBe('X')
   })
 
   test(`it's typed`, ({ expectTypeOf }) => {
-    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => number) => number | Err<'Unknown'>>()
-    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => Promise<string>) => Promise<string | Err<'Unknown'>>>()
+    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => number, handler: (err: unknown) => Err<'X'>) => number | Err<'X'>>()
+    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => Promise<string>, handler: (err: unknown) => Err<'X'>) => Promise<string | Err<'X'>>>()
   })
 })

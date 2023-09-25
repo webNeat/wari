@@ -308,7 +308,7 @@ async function main() {
 }
 ```
 
-Use the `match` function to match a value against all possible error types. Typescript infers possible error types and gives you autocomplete. You can all or some errors separately and provide a default handler for the remaining errors.
+Use the `match` function to match a value against all possible error types. Typescript infers possible error types and gives you autocomplete. You can handle all or some errors separately and provide a default handler for the remaining errors as the third argument.
 
 if the value given to `match` is not an error, it's simply returned as is. Otherwise, the corresponding handler is called and is returned value is returned.
 
@@ -333,7 +333,7 @@ async function main() {
 
 ## 5. Catch errors thrown by external code
 
-Even if you don't use `throw` in your code, external code may still throw errors when you call it. In that case, you can use `catch` to catch any thrown error and convert it into a wari error:
+Even if you don't use `throw` in your code, external code may still throw errors when you call it. In that case, you can use `catch` to catch any thrown error and handle it:
 
 ```ts
 import * as E from 'wari'
@@ -343,20 +343,20 @@ function mayThrow(x: number) {
   return x
 }
 
-const res = E.catch(mayThrow, 1) //=> 1
-const res = E.catch(mayThrow, 42) //=> Err<'Unknown'> with details: {error: new Error('Oooops') }
-```
+E.catch(
+  () => mayThrow(1),
+  err => 0
+) //=> 1
 
-if you are calling a function that may throw multiple times across your code, you can create a safe function (a function that returns instead of throwing) from it.
+E.catch(
+  () => mayThrow(42),
+  err => 0
+) //=> 0
 
-```ts
-import * as E from 'wari'
-
-function safeJsonParse<T>(text: string) {
-  const res = E.catch(JSON.parse, text)
-  if (E.any(res)) return E.new('JsonError', {text})
-  return res as T
-}
+E.catch(
+  () => mayThrow(42),
+  err => E.new('SomeError')
+) //=> Err<'SomeError'>
 ```
 
 **Note:** The `catch` function has an alias called `tryCatch`, if you don't want to import all functions by using
@@ -375,6 +375,21 @@ import {tryCatch} from 'wari'
 // Use `tryCatch` instead
 ```
 
+## 6. Create safe functions for external code
+
+if you are calling a function that may throw multiple times across your code, you can use `safe` to create a safe function (a function that returns instead of throwing) from it. The returned function will take the same arguments and execute the original function:
+
+- if no error is thrown, the result is simply returned.
+- if an error is thrown (or a rejecting promise is returned), the given handler is called with the arguments and the error; its return is returned.
+
+```ts
+import * as E from 'wari'
+
+const safeJsonParse = E.safe(JSON.parse, ([text], err) => E.new('JsonError', {text}))
+
+safeJsonParse('{"') //=> Err<'JsonError'> with details {text: '{"'}
+```
+
 # Contributing
 
 You can contribute to this library in many ways, including:
@@ -386,6 +401,11 @@ You can contribute to this library in many ways, including:
 Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
+
+**1.4.0 (September 24th 2023)**
+
+- Change the `catch` function to take a function with no arguments and a handler.
+- Add `safe` function to create safe functions.
 
 **1.3.0 (September 1st 2023)**
 

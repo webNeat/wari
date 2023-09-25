@@ -1,7 +1,7 @@
 import { Is, Equal } from 'just-types/test'
-import { GetErrorKeys, GuardReturn, MatchHandlers, MatchReturn, Handler } from '../src/types/index.js'
 import { Err } from '../src/Err.js'
 import { ToTuple } from '../src/types/utils.js'
+import { GetErrorKeys, GuardReturn, MatchHandlers, MatchReturn, Handler } from '../src/types/index.js'
 
 declare module '../src/index.js' {
   interface ErrorTypes {
@@ -32,15 +32,15 @@ type GetErrorKeys_Tests = [
 ]
 
 type GuardReturn_Tests = [
-  Is<Equal<GuardReturn<never>, Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<void>, void | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<void>, void | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<null | boolean>, null | boolean | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<string>, string | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<number | Err<'FileError'>>, number | Err<'FileError'> | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<Error>, Error | Err<'Unknown'>>>,
-  Is<Equal<GuardReturn<Promise<string | number>>, Promise<string | number | Err<'Unknown'>>>>,
-  Is<Equal<GuardReturn<Promise<string | Err<'JsonError'>>>, Promise<string | Err<'JsonError'> | Err<'Unknown'>>>>,
+  Is<Equal<GuardReturn<never, Err<'X'>>, Err<'X'>>>,
+  Is<Equal<GuardReturn<void, Err<'X'>>, void | Err<'X'>>>,
+  Is<Equal<GuardReturn<void, Err<'X'>>, void | Err<'X'>>>,
+  Is<Equal<GuardReturn<null | boolean, Err<'X'>>, null | boolean | Err<'X'>>>,
+  Is<Equal<GuardReturn<string, Err<'X'>>, string | Err<'X'>>>,
+  Is<Equal<GuardReturn<number | Err<'FileError'>, Err<'X'>>, number | Err<'FileError'> | Err<'X'>>>,
+  Is<Equal<GuardReturn<Error, Err<'X'>>, Error | Err<'X'>>>,
+  Is<Equal<GuardReturn<Promise<string | number>, Err<'X'>>, Promise<string | number | Err<'X'>>>>,
+  Is<Equal<GuardReturn<Promise<string | Err<'JsonError'>>, Err<'X'>>, Promise<string | Err<'JsonError'> | Err<'X'>>>>,
 ]
 
 type MatchHandlers_Tests = [
