@@ -402,6 +402,10 @@ Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
 
+**1.4.1 (November 21st 2023)**
+
+- Update dependencies.
+
 **1.4.0 (September 24th 2023)**
 
 - Change the `catch` function to take a function with no arguments and a handler.
