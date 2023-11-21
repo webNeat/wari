@@ -15,7 +15,7 @@ test.group('safe', () => {
 
   test('it handles sync errors', async ({ expect }) => {
     const error = new Error('Something went wrong')
-    const handler = (err: unknown, args: any[]) => make('Unknown', {error: {err, args}})
+    const handler = (err: unknown, args: any[]) => make('Unknown', { error: { err, args } })
     const fn = safe((x: number) => {
       if (x === 42) return true
       throw error
@@ -25,26 +25,35 @@ test.group('safe', () => {
     const res = fn(1) as Err
     expect(res).toBeInstanceOf(Err)
     expect(res.type).toBe('Unknown')
-    expect(res.details.error).toEqual({err: error, args: [1]})
+    expect(res.details.error).toEqual({ err: error, args: [1] })
   })
 
   test('it handles async errors', async ({ expect }) => {
     const error = new Error('Something went wrong')
-    const handler = (err: unknown, args: any[]) => make('Unknown', {error: {err, args}})
+    const handler = (err: unknown, args: any[]) => make('Unknown', { error: { err, args } })
     const fn = safe(async (x: number) => {
       if (x === 42) return true
       throw error
     }, handler)
     expect(await fn(42)).toBe(true)
 
-    const res = await fn(1) as Err
+    const res = (await fn(1)) as Err
     expect(res).toBeInstanceOf(Err)
     expect(res.type).toBe('Unknown')
-    expect(res.details.error).toEqual({err: error, args: [1]})
+    expect(res.details.error).toEqual({ err: error, args: [1] })
   })
 
-  test(`it's typed`, ({ expectTypeOf }) => {
-    expectTypeOf(safe).toMatchTypeOf<(fn: (x: number, y: string) => number, handler: (err: unknown, args: [number, string]) => Err<'X'>) => (x: number, y: string) => number | Err<'X'>>()
-    expectTypeOf(safe).toMatchTypeOf<(fn: () => Promise<string>, handler: (err: unknown, args: []) => Err<'X'>) => () => Promise<string | Err<'X'>>>()
+  test(`it's typed`, async ({ expectTypeOf }) => {
+    expectTypeOf(
+      safe(
+        (x: number, y: string) => 1,
+        (err: unknown, args: [number, string]) => make('X', {}),
+      ),
+    ).toEqualTypeOf<(x: number, y: string) => number | Err<'X'>>()
+    const fn = safe(
+      async () => '...',
+      (err: unknown, args: []) => make('X', {}),
+    )
+    expectTypeOf(await fn()).toEqualTypeOf<string | Err<'X'>>()
   })
 })

@@ -31,8 +31,18 @@ test.group('tryCatch', () => {
     expect(res.type).toBe('X')
   })
 
-  test(`it's typed`, ({ expectTypeOf }) => {
-    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => number, handler: (err: unknown) => Err<'X'>) => number | Err<'X'>>()
-    expectTypeOf(tryCatch).toMatchTypeOf<(fn: () => Promise<string>, handler: (err: unknown) => Err<'X'>) => Promise<string | Err<'X'>>>()
+  test(`it's typed`, async ({ expectTypeOf }) => {
+    expectTypeOf(
+      tryCatch(
+        () => 1,
+        (err) => make('X', {}),
+      ),
+    ).toEqualTypeOf<number | Err<'X'>>()
+    expectTypeOf(
+      await tryCatch(
+        async () => '...',
+        (err) => make('X', {}),
+      ),
+    ).toMatchTypeOf<string | Err<'X'>>()
   })
 })
