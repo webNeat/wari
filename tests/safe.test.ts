@@ -43,17 +43,61 @@ test.group('safe', () => {
     expect(res.details.error).toEqual({ err: error, args: [1] })
   })
 
-  test(`it's typed`, async ({ expectTypeOf }) => {
-    expectTypeOf(
-      safe(
-        (x: number, y: string) => 1,
-        (err: unknown, args: [number, string]) => make('X', {}),
-      ),
-    ).toEqualTypeOf<(x: number, y: string) => number | Err<'X'>>()
-    const fn = safe(
-      async () => '...',
-      (err: unknown, args: []) => make('X', {}),
+  test(`it's typed`, ({ expectTypeOf }) => {
+    const fn_no_return = safe(
+      () => {},
+      () => 10,
     )
-    expectTypeOf(await fn()).toEqualTypeOf<string | Err<'X'>>()
+    expectTypeOf(fn_no_return).toMatchTypeOf<() => void | number>()
+
+    const fn_default_return = safe(
+      (text: string) => text,
+      () => 'default',
+    )
+    expectTypeOf(fn_default_return).toMatchTypeOf<(text: string) => string>()
+
+    const fn_sync_error = safe(
+      (text: string) => text,
+      () => make('X', {}),
+    )
+    expectTypeOf(fn_sync_error).toMatchTypeOf<(text: string) => string | Err<'X'>>()
+
+    const fn_sync_many_errors = safe(
+      (text: string) => text,
+      (err, [text]) => {
+        if (text.length < 5) return make('X', {})
+        return make('Y', {})
+      },
+    )
+    expectTypeOf(fn_sync_many_errors).toMatchTypeOf<(text: string) => string | Err<'X'> | Err<'Y'>>()
+
+    const fn_async_default_return = safe(
+      async (text: string) => text,
+      (err, args) => 'default',
+    )
+    expectTypeOf(fn_async_default_return).toMatchTypeOf<(text: string) => Promise<string>>()
+
+    const fn_async_error = safe(
+      async (text: string) => text,
+      (err, args) => make('X', {}),
+    )
+    expectTypeOf(fn_async_error).toMatchTypeOf<(text: string) => Promise<string | Err<'X'>>>()
+
+    const fn_async_many_errors = safe(
+      async (text: string) => text,
+      (err, [text]) => {
+        if (text.length < 5) return make('X', {})
+        return make('Y', {})
+      },
+    )
+    expectTypeOf(fn_async_many_errors).toMatchTypeOf<(text: string) => Promise<string | Err<'X'> | Err<'Y'>>>()
+
+    const fn_always_throws = safe(
+      (text: string) => {
+        throw 'Ooops!'
+      },
+      (err, args) => 'default',
+    )
+    expectTypeOf(fn_always_throws).toEqualTypeOf<(text: string) => string>()
   })
 })

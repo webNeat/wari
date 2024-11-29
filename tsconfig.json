@@ -1,22 +1,8 @@
 {
-  "exclude": ["dist", "node_modules"],
+  "extends": "@total-typescript/tsconfig/tsc/no-dom/library",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
-    "lib": ["esnext"],
-    "rootDir": ".",
     "noEmit": true,
-    "sourceMap": true,
-    "importHelpers": true,
-    "declaration": true,
-    "strict": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "jsx": "react",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "rootDir": ".",
+    "skipDefaultLibCheck": true
   }
 }

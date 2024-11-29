@@ -1,7 +1,7 @@
-import { Is, Equal } from 'just-types/test'
 import { Err } from '../src/Err.js'
-import { ToTuple } from '../src/types/utils.js'
-import { GetErrorKeys, GuardReturn, MatchHandlers, MatchReturn, Handler } from '../src/types/index.js'
+import type { Is, Equal } from 'just-types/test'
+import type { ToTuple } from '../src/types/utils.js'
+import type { GetErrorKeys, GuardReturn, MatchHandlers, MatchReturn, Handler } from '../src/types/index.js'
 
 declare module '../src/index.js' {
   interface ErrorTypes {

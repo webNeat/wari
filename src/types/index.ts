@@ -1,6 +1,6 @@
-import { Equal } from 'just-types/test'
+import type { Equal } from 'just-types/test'
 import type { Err } from '../Err.js'
-import { VoidToUndefined } from './utils.js'
+import type { VoidToUndefined } from './utils.js'
 
 export interface ErrorTypes {
   Unknown: { error: unknown }
@@ -10,7 +10,7 @@ export type ErrorDetails<K extends ErrorKey = ErrorKey> = ErrorTypes[K]
 
 export type GetErrorKeys<E> = E extends Err<infer K> ? K : never
 
-export type GuardReturn<T, U> = Equal<T, never> extends true ? U : T extends Promise<infer R> ? Promise<R | U> : T | U
+export type GuardReturn<T, U> = [T] extends [never] ? U : T extends Promise<infer R> ? Promise<R | U> : T | U
 
 export type MatchHandlers<E> = {
   [key in GetErrorKeys<E>]: Handler<key>

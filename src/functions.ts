@@ -1,5 +1,5 @@
-import { Normalize } from 'just-types/common'
 import { Err } from './Err.js'
+import type { Normalize } from 'just-types/common'
 import type { ErrorDetails, ErrorKey, GetErrorKeys, GuardReturn, MatchDefaultHandler, MatchHandlers, MatchReturn } from './types/index.js'
 
 export function make<K extends ErrorKey>(type: K, details: ErrorDetails<K>) {
