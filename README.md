@@ -1,179 +1,40 @@
 # wari
 
-A type-safe way to create and handle errors.
+A type-safe way to create and handle errors in TypeScript.
 
 [![Bundle size](https://img.shields.io/bundlephobia/minzip/wari?style=flat-square)](https://bundlephobia.com/result?p=wari)
 [![Version](https://img.shields.io/npm/v/wari?style=flat-square)](https://www.npmjs.com/package/wari)
 [![Tests Status](https://img.shields.io/github/actions/workflow/status/webneat/wari/tests.yml?branch=main&style=flat-square)](https://github.com/webneat/wari/actions?query=workflow:"Tests")
-[![MIT](https://img.shields.io/npm/l/wari?style=flat-square)](LICENSE)
+[![MIT License](https://img.shields.io/npm/l/wari?style=flat-square)](LICENSE)
 
 # Contents
 
 - [Introduction](#introduction)
-- [Basic usage steps](#basic-usage-steps)
-  - [ 1. Installation](#1-installation)
-  - [ 2. Define your error types](#2-define-your-error-types)
-  - [ 3. Create errors](#3-create-errors)
-  - [ 4. Handle errors](#4-handle-errors)
-  - [5. Catch errors thrown by external code](#5-catch-errors-thrown-by-external-code)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+  - [Defining Error Types](#defining-error-types)
+  - [Creating Errors](#creating-errors)
+  - [Handling Errors](#handling-errors)
+  - [Catching External Errors](#catching-external-errors)
+  - [Creating Safe Functions](#creating-safe-functions)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 
 # Introduction
 
-Consider the following Nodejs code
+**wari** is a TypeScript library that provides a type-safe way to create and handle errors. It allows you to define custom error types and handle them using pattern matching, without the need to create custom error classes or use `instanceof` checks.
 
-```ts
-import {writeFile} from 'fs/promises'
+## Why Use wari?
 
-async function fetchData() {
-  const res = await fetch('...')
-  if (!res.ok) throw new Error(`HTTP request failed`)
-  try {
-    const data = await res.json()
-    return data
-  } catch (err) {
-    throw new Error('HTTP response content is not valid JSON')
-  }
-}
+**wari** simplifies error handling by:
 
-async function writeData(filePath, data) {
-  try {
-    await writeFile(filePath, JSON.stringify(data))
-  } catch (err) {
-    throw new Error(`Error while writing to file ${filePath}`)
-  }
-}
-
-async function main() {
-  try {
-    const data = await fetchData()
-    // ... transform data
-    await writeData('result.json', transformedData)
-  } catch (err) {
-    // how to handle `err` differently depending on the actual error?
-  }
-}
-```
-
-The standard solution to differenciate between thrown errors is to create a new class that extends the `Error` class and use `instanceof` to check the type of `err`:
-
-```ts
-import {writeFile} from 'fs/promises'
-
-class HttpError extends Error {}
-class JsonError extends Error {}
-class FileError extends Error {}
-
-async function fetchData() {
-  const res = await fetch('...')
-  if (!res.ok) throw new HttpError(`HTTP request failed`)
-  try {
-    const data = await res.json()
-    return data
-  } catch (err) {
-    throw new JsonError('HTTP response content is not valid JSON')
-  }
-}
-
-async function writeData(filePath, data) {
-  try {
-    await writeFile(filePath, JSON.stringify(data))
-  } catch (err) {
-    throw new FileError(`Error while writing to file ${filePath}`)
-  }
-}
-
-async function main() {
-  try {
-    const data = await fetchData()
-    // ... handle/transform data
-    await writeData('result.json', transformedData)
-  } catch (err) {
-    if (err instanceof HttpError) {
-      // handle HTTP error
-    } else if (err instanceof JsonError) {
-      // handle JSON error
-    } else if (err instanceof FileError) {
-      // handle file error
-    } else {
-      // handle other errors
-    }
-  }
-}
-```
-
-This works, now what if we need more details about the error? We will need to add properties to the errors classes and fill them in the constructors:
-
-```ts
-import {writeFile} from 'fs/promises'
-
-class HttpError extends Error {
-  constructor(public method: 'GET' | 'POST', public url: string, public status: number) {
-    super(`${method} request to '${url}' failed with status code ${status}`)
-  }
-}
-
-class JsonError extends Error {
-  constructor(public text: string) {
-    super(`Failed to parse the text '${text}' as JSON`)
-  }
-}
-
-class FileError extends Error {
-  constructor(public operation: 'read' | 'write', public filePath: string, public error: Error) {
-    super(`The ${operation} operation on file '${filePath}' has failed with error '${error}'`)
-  }
-}
-
-async function fetchData() {
-  const res = await fetch('...')
-  if (!res.ok) throw new HttpError('GET', '...', res.status)
-  const text = await res.text()
-  try {
-    return JSON.parse(text)
-  } catch (err) {
-    throw new JsonError(text)
-  }
-}
-
-async function writeData(filePath, data) {
-  try {
-    await writeFile(filePath, JSON.stringify(data))
-  } catch (err) {
-    throw new FileError('write', filePath, err)
-  }
-}
-
-async function main() {
-  try {
-    const data = await fetchData()
-    // ... handle/transform data
-    await writeData('result.json', transformedData)
-  } catch (err) {
-    if (err instanceof HttpError) {
-      // err.method, err.url and err.status can be used here
-    } else if (err instanceof JsonError) {
-      // err.text can be used here
-    } else if (err instanceof FileError) {
-      // err.operation, err.filePath and the original err.error can be used here
-    } else {
-      // handle other errors
-    }
-  }
-}
-```
-
-This is better and more flexible, but it has some issues:
-- The code is verbose.
-- We need to create a new class for every new error type.
-- We need to remember the possible errors thrown by every function and import them to do `err instanceof ErrorClass`. This can easily cause us to miss some error cases.
-
-The goal of `wari` is to solve these issues while keeping type-safety and being easy to use.
+- Allowing you to define **error types** without creating new classes.
+- Providing **type-safe functions** to create and handle errors.
+- Enabling **pattern matching** on errors for cleaner and more maintainable code.
 
 # Get started with `wari`
 
-## 1. Installation
+## Installation
 
 Start by installing the library
 
@@ -185,7 +46,7 @@ yarn add wari
 pnpm add wari
 ```
 
-## 2. Define your error types
+## Defining Error Types
 
 `wari` exports the interface `ErrorTypes` which can used to add new error types as follows:
 
@@ -200,7 +61,7 @@ declare module 'wari' {
 ```
 This uses the [interfaces declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#merging-interfaces) to make `wari` functions aware of the types of your custom errors.
 
-The code snippet above is equivalent to the following (but it doesn't actually create any classes):
+You can think of the code above as equivalent to the following (but it doesn't actually create any classes):
 
 ```ts
 class HttpError extends Error {
@@ -225,7 +86,7 @@ class FileError extends Error {
 }
 ```
 
-## 3. Create errors
+## Creating Errors
 
 Use the `new` function to create new errors. Typescript will offer you autocomplete for the first argument of the `new` function, so you don't have to remember all errors names. Once you choose a name, the second argument will be typed with the corresponding details type.
 
@@ -259,7 +120,7 @@ import {make} from 'wari'
 // Use `make` instead
 ```
 
-## 4. Handle errors
+## Handling Errors
 
 Use `any`, `is` and `match` functions to handle errors.
 
@@ -331,7 +192,7 @@ async function main() {
 }
 ```
 
-## 5. Catch errors thrown by external code
+## Catching External Errors
 
 Even if you don't use `throw` in your code, external code may still throw errors when you call it. In that case, you can use `catch` to catch any thrown error and handle it:
 
@@ -375,7 +236,7 @@ import {tryCatch} from 'wari'
 // Use `tryCatch` instead
 ```
 
-## 6. Create safe functions for external code
+## Creating Safe Functions
 
 if you are calling a function that may throw multiple times across your code, you can use `safe` to create a safe function (a function that returns instead of throwing) from it. The returned function will take the same arguments and execute the original function:
 
@@ -401,6 +262,11 @@ You can contribute to this library in many ways, including:
 Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
+
+**1.4.2 (November 29th 2024)**
+
+- Update dependencies and documentation
+- Fix some types
 
 **1.4.1 (November 21st 2023)**
 

@@ -1,7 +1,7 @@
 {
   "name": "wari",
   "author": "Amine Ben hammou (@webNeat)",
-  "description": "A type-safe way to create and handle errors.",
+  "description": "A type-safe way to create and handle errors in Typescript.",
   "keywords": [
     "type-safe",
     "errors handling",
@@ -14,7 +14,7 @@
     "match expression"
   ],
   "license": "MIT",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "repository": "webNeat/wari",
   "homepage": "https://github.com/webNeat/wari",
   "type": "module",
@@ -37,14 +37,13 @@
     "@japa/expect": "^3.0.2",
     "@japa/expect-type": "^2.0.2",
     "@japa/runner": "^3.1.4",
-    "@japa/spec-reporter": "^1.3.3",
+    "@total-typescript/tsconfig": "^1.0.4",
     "@types/node": "^22.10.1",
     "prettier": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@total-typescript/tsconfig": "^1.0.4",
-    "just-types": "^2.0.0-alpha.3"
+    "just-types": "2.0.0-alpha.3"
   }
 }

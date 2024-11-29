@@ -10,6 +10,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 22
+      - run: npm i -g pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - name: Publish to npm
