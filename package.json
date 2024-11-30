@@ -14,7 +14,7 @@
     "match expression"
   ],
   "license": "MIT",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "repository": "webNeat/wari",
   "homepage": "https://github.com/webNeat/wari",
   "type": "module",
