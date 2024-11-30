@@ -263,6 +263,10 @@ Those are just examples, any issue or pull request is welcome :)
 
 # Changelog
 
+**1.4.3 (November 30th 2024)**
+
+- Fix stringifying circular objects
+
 **1.4.2 (November 29th 2024)**
 
 - Update dependencies and documentation
