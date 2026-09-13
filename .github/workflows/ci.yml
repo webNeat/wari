@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24', '26']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build
+      - run: pnpm test
+      - if: matrix.node == '24'
+        run: pnpm test:coverage
+      - if: matrix.node == '24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: error
+      - run: pnpm test:types
+      # pnpm 12.4.1 writes an invalid empty file: lock entry for this isolated fixture.
+      - run: npm --prefix tests/consumer run install:lib
+      - run: pnpm --dir tests/consumer run test:native
+      - run: pnpm run test:e2e:node
+
+  typescript:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: ['5.0.4', '5.1.6', '5.2.2', '5.3.3', '5.4.5', '5.5.4', '5.6.3', '5.7.3', '5.8.3', '5.9.3', '7.0.2']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      # See tests/consumer/README.md for why this fixture uses npm.
+      - run: npm --prefix tests/consumer run install:lib
+      - run: pnpm --dir tests/consumer run test:types
+        env:
+          TS_VERSION: ${{ matrix.typescript }}
+
+  browser-consumer:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      # See tests/consumer/README.md for why this fixture uses npm.
+      - run: npm --prefix tests/consumer run install:lib
+      - run: pnpm exec playwright install --with-deps ${{ matrix.project }}
+      - run: pnpm exec vp test --project ${{ matrix.project }}

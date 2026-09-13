@@ -1,0 +1,13 @@
+{
+  "name": "wari-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:lib": "npm ci --install-links --ignore-scripts",
+    "test:native": "node native-require.cjs",
+    "test:types": "pnpm dlx --package=typescript@${TS_VERSION:-7.0.2} tsc -p tsconfig.nodenext.json && pnpm dlx --package=typescript@${TS_VERSION:-7.0.2} tsc -p tsconfig.node16.json && pnpm dlx --package=typescript@${TS_VERSION:-7.0.2} tsc -p tsconfig.bundler.json"
+  },
+  "dependencies": {
+    "wari": "file:../.."
+  }
+}

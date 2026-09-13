@@ -1,7 +1,9 @@
-*.log
-.DS_Store
-node_modules
-.parcel-cache
-.nvmrc
-dist
-coverage
+node_modules/
+dist/
+coverage/
+.npm/
+*.tgz
+*.tsbuildinfo
+playwright-report/
+test-results/
+archive

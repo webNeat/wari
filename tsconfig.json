@@ -1,8 +1,11 @@
 {
-  "extends": "@total-typescript/tsconfig/tsc/no-dom/library",
   "compilerOptions": {
-    "noEmit": true,
-    "rootDir": ".",
-    "skipDefaultLibCheck": true
-  }
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "tests/types/**/*.ts"]
 }
