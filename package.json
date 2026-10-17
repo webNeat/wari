@@ -1,49 +1,72 @@
 {
   "name": "wari",
-  "author": "Amine Ben hammou (@webNeat)",
-  "description": "A type-safe way to create and handle errors in Typescript.",
+  "version": "2.0.0-alpha.1",
+  "description": "Type-safe error handling utilities for TypeScript.",
   "keywords": [
-    "type-safe",
-    "errors handling",
-    "catch",
-    "throw",
-    "try",
-    "error management",
-    "fully typed",
-    "error matching",
-    "match expression"
+    "error-handling",
+    "errors",
+    "typescript"
   ],
-  "license": "MIT",
-  "version": "1.4.3",
-  "repository": "webNeat/wari",
   "homepage": "https://github.com/webNeat/wari",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "author": "Amine Ben hammou (@webNeat)",
+  "repository": "https://github.com/webNeat/wari",
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
   },
-  "engines": {
-    "node": ">=16"
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
   },
   "scripts": {
-    "test": "tsc --noEmit && tsx bin/test.ts",
-    "build": "rm -rf dist && tsc -p tsconfig.build.json"
+    "build": "vp pack",
+    "check": "vp check",
+    "test": "vp test --project unit",
+    "test:types": "tsc --noEmit -p tests/types/tsconfig.json",
+    "test:e2e:prepare": "pnpm build && npm --prefix tests/consumer run install:lib",
+    "test:e2e": "pnpm run test:e2e:prepare && pnpm run test:e2e:runtime && pnpm --dir tests/consumer run test:native && pnpm --dir tests/consumer run test:types",
+    "test:e2e:runtime": "vp test --project node --project chromium --project firefox --project webkit",
+    "test:e2e:node": "vp test --project node",
+    "test:e2e:chromium": "vp test --project chromium",
+    "test:e2e:firefox": "vp test --project firefox",
+    "test:e2e:webkit": "vp test --project webkit",
+    "test:e2e:native-require": "pnpm --dir tests/consumer run test:native",
+    "test:e2e:types": "pnpm --dir tests/consumer run test:types",
+    "test:all": "pnpm test && pnpm test:types && pnpm test:e2e",
+    "test:pack": "npm pack --dry-run --ignore-scripts",
+    "test:coverage": "vp test --project unit --coverage",
+    "release": "pnpm build && pnpm exec changeset publish --tag alpha",
+    "prepack": "pnpm build"
   },
   "devDependencies": {
-    "@japa/expect": "^3.0.2",
-    "@japa/expect-type": "^2.0.2",
-    "@japa/runner": "^3.1.4",
-    "@total-typescript/tsconfig": "^1.0.4",
-    "@types/node": "^22.10.1",
-    "prettier": "^3.4.1",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
+    "@playwright/test": "1.64.1",
+    "@vitest/browser-playwright": "5.0.4",
+    "@vitest/coverage-v8": "5.0.4",
+    "typescript": "7.0.2",
+    "vite-plus": "1.2.0"
   },
-  "dependencies": {
-    "just-types": "2.0.0-alpha.3"
-  }
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@12.4.1"
 }
